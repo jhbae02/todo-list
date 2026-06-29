@@ -5,15 +5,21 @@
 
 <br>
 
+## 데모
+
+![데모 애니메이션](assets/demo.gif)
+
+<br>
+
 ## 스크린샷
 
-| 메인 화면 | 완료 항목 보기 |
-|:---------:|:--------------:|
-| ![메인](assets/screenshot-main.png) | ![완료](assets/screenshot-completed.png) |
+| 메인 화면 | 키워드 검색 |
+|:---------:|:-----------:|
+| ![메인](assets/screenshot-main.png) | ![검색](assets/screenshot-search.png) |
 
-| 그룹 필터 | 빈 화면 |
-|:---------:|:-------:|
-| ![그룹필터](assets/screenshot-group.png) | ![빈화면](assets/screenshot-empty.png) |
+| 그룹 필터 | 완료 항목 |
+|:---------:|:---------:|
+| ![그룹필터](assets/screenshot-group.png) | ![완료](assets/screenshot-completed.png) |
 
 <br>
 
@@ -25,6 +31,17 @@
 - **완료 처리** — 체크박스 클릭 시 취소선 표시 및 완료 시간 자동 기록
 - **시간 기록** — 추가 시간 및 완료 시간을 `연-월-일 시:분` 형식으로 표시
 - **개별 삭제** — 각 항목 우측 `×` 버튼으로 삭제
+- **영구 저장** — 브라우저 localStorage에 자동 저장, 새로고침 후에도 유지
+
+### 마감일 & 우선순위
+- **마감일(D-day)** — 날짜 지정 시 `D-Day` / `D-N` / `D+N` 배지 자동 표시
+- **우선순위** — 높음 / 보통 / 낮음 설정, 우선순위 순으로 자동 정렬
+- **색상 배지** — 우선순위 및 D-day 상태에 따라 빨강/노랑/초록 구분
+
+### 검색
+- **실시간 키워드 검색** — 입력과 동시에 할 일 제목/설명 필터링
+- **텍스트 하이라이팅** — 일치하는 키워드를 노란색으로 강조 표시
+- **검색 초기화** — `×` 버튼으로 즉시 초기화
 
 ### 필터 & 뷰
 - **상태 탭** — 전체 / 진행 중 / 완료 탭 전환, 각 탭에 항목 수 뱃지 표시
@@ -36,6 +53,10 @@
 - **그룹 색상** — 그룹마다 8가지 색상 팔레트 자동 적용으로 시각적 구분
 - **그룹 지정** — 할 일 추가 시 드롭다운으로 그룹 선택
 - **그룹 삭제** — 그룹 삭제 시 해당 그룹의 할 일은 '그룹 없음'으로 처리
+
+### 드래그 앤 드롭
+- **순서 변경** — 좌측 핸들(`⋮⋮`)을 잡고 드래그하여 할 일 순서 자유롭게 변경
+- **시각적 피드백** — 드래그 중 반투명 효과 및 삽입 위치 표시
 
 ### UX
 - **빈 화면 안내** — 항목이 없을 때 일러스트와 안내 문구 표시
@@ -64,6 +85,6 @@ todo-list/
 ![CSS3](https://img.shields.io/badge/CSS3-1572B6?style=flat-square&logo=css3&logoColor=white)
 ![JavaScript](https://img.shields.io/badge/JavaScript-F7DF1E?style=flat-square&logo=javascript&logoColor=black)
 
-- **HTML5** — 시맨틱 마크업
+- **HTML5** — 시맨틱 마크업, Drag & Drop API
 - **CSS3** — Flexbox 레이아웃, 커스텀 체크박스, CSS 트랜지션
-- **JavaScript (Vanilla)** — 외부 라이브러리 없이 순수 JS로 구현
+- **JavaScript (Vanilla)** — 외부 라이브러리 없이 순수 JS로 구현, localStorage 활용
