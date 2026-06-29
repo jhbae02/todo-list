@@ -26,6 +26,26 @@ const GROUP_COLORS = [
   { bg: '#dff0ff', text: '#1a5888', border: '#96c8e8' },
 ];
 
+// ── Storage ───────────────────────────────────────────────────
+function saveToStorage() {
+  try {
+    localStorage.setItem('tdl-todos', JSON.stringify(todos));
+    localStorage.setItem('tdl-groups', JSON.stringify(groups));
+    localStorage.setItem('tdl-nextGroupId', String(nextGroupId));
+  } catch(e) {}
+}
+
+function loadFromStorage() {
+  try {
+    const t = localStorage.getItem('tdl-todos');
+    const g = localStorage.getItem('tdl-groups');
+    const n = localStorage.getItem('tdl-nextGroupId');
+    if (t) todos = JSON.parse(t);
+    if (g) groups = JSON.parse(g);
+    if (n) nextGroupId = parseInt(n);
+  } catch(e) {}
+}
+
 // ── Group management ──────────────────────────────────────────
 function addGroup(name) {
   const trimmed = name.trim();
@@ -33,6 +53,7 @@ function addGroup(name) {
   const colorIndex = groups.length % GROUP_COLORS.length;
   groups.push({ id: nextGroupId++, name: trimmed, colorIndex });
   updateGroupUI();
+  saveToStorage();
 }
 
 function deleteGroup(id) {
@@ -372,6 +393,8 @@ function render() {
   document.getElementById('count-all').textContent = todos.length;
   document.getElementById('count-active').textContent = activeCount;
   document.getElementById('count-completed').textContent = completedCount;
+
+  saveToStorage();
 }
 
 selectAllCheckbox.addEventListener('change', () => {
@@ -400,4 +423,6 @@ tabs.forEach(tab => {
 
 clearCompletedBtn.addEventListener('click', clearCompleted);
 
+loadFromStorage();
+updateGroupUI();
 render();
