@@ -15,6 +15,7 @@ let nextGroupId = 1;
 let currentFilter = 'all';
 let currentGroupFilter = null;
 let searchQuery = '';
+let draggedId = null;
 
 const GROUP_COLORS = [
   { bg: '#dde5f7', text: '#2a4a9f', border: '#b0c2ee' },
@@ -320,6 +321,45 @@ function render() {
       const li = document.createElement('li');
       li.className = 'todo-item' + (todo.completed ? ' completed' : '');
 
+      li.setAttribute('draggable', 'true');
+      li.dataset.id = todo.id;
+      li.addEventListener('dragstart', e => {
+        draggedId = todo.id;
+        li.classList.add('dragging');
+        e.dataTransfer.effectAllowed = 'move';
+      });
+      li.addEventListener('dragend', () => {
+        draggedId = null;
+        li.classList.remove('dragging');
+        document.querySelectorAll('.todo-item.drag-over').forEach(el => el.classList.remove('drag-over'));
+      });
+      li.addEventListener('dragover', e => {
+        e.preventDefault();
+        if (draggedId === todo.id) return;
+        e.dataTransfer.dropEffect = 'move';
+        document.querySelectorAll('.todo-item.drag-over').forEach(el => el.classList.remove('drag-over'));
+        li.classList.add('drag-over');
+      });
+      li.addEventListener('dragleave', e => {
+        if (!li.contains(e.relatedTarget)) li.classList.remove('drag-over');
+      });
+      li.addEventListener('drop', e => {
+        e.preventDefault();
+        li.classList.remove('drag-over');
+        if (!draggedId || draggedId === todo.id) return;
+        const fromIdx = todos.findIndex(t => t.id === draggedId);
+        const toIdx = todos.findIndex(t => t.id === todo.id);
+        if (fromIdx === -1 || toIdx === -1) return;
+        const [moved] = todos.splice(fromIdx, 1);
+        todos.splice(toIdx, 0, moved);
+        render();
+      });
+
+      const dragHandle = document.createElement('span');
+      dragHandle.className = 'drag-handle';
+      dragHandle.innerHTML = '&#8942;&#8942;';
+      dragHandle.title = '드래그하여 순서 변경';
+
       const checkbox = document.createElement('input');
       checkbox.type = 'checkbox';
       checkbox.checked = todo.completed;
@@ -423,6 +463,7 @@ function render() {
       delBtn.title = '삭제';
       delBtn.addEventListener('click', () => deleteTodo(todo.id));
 
+      li.appendChild(dragHandle);
       li.appendChild(checkbox);
       li.appendChild(textWrap);
       li.appendChild(delBtn);
