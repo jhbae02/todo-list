@@ -199,14 +199,30 @@ const EMPTY_SVG = `
   <path d="M65 72l4.5 4.5 9-9" stroke="white" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/>
 </svg>`;
 
+const PRIORITY_ORDER = { high: 0, normal: 1, low: 2, '': 3 };
+
+function getDday(dueDateStr) {
+  if (!dueDateStr) return null;
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const due = new Date(dueDateStr);
+  due.setHours(0, 0, 0, 0);
+  const diff = Math.round((due - today) / (1000 * 60 * 60 * 24));
+  if (diff < 0) return { label: `D+${Math.abs(diff)}`, cls: 'dday-over' };
+  if (diff === 0) return { label: 'D-Day', cls: 'dday-today' };
+  return { label: `D-${diff}`, cls: 'dday-soon' };
+}
+
 function getFiltered() {
-  return todos.filter(t => {
-    const statusMatch = currentFilter === 'active' ? !t.completed
-      : currentFilter === 'completed' ? t.completed
-      : true;
-    const groupMatch = currentGroupFilter === null ? true : t.groupId === currentGroupFilter;
-    return statusMatch && groupMatch;
-  });
+  return todos
+    .filter(t => {
+      const statusMatch = currentFilter === 'active' ? !t.completed
+        : currentFilter === 'completed' ? t.completed
+        : true;
+      const groupMatch = currentGroupFilter === null ? true : t.groupId === currentGroupFilter;
+      return statusMatch && groupMatch;
+    })
+    .sort((a, b) => (PRIORITY_ORDER[a.priority || ''] - PRIORITY_ORDER[b.priority || '']));
 }
 
 function addTodo() {
@@ -215,12 +231,16 @@ function addTodo() {
   const description = todoDescInput.value.trim();
   const groupIdVal = document.getElementById('todo-group-select').value;
   const groupId = groupIdVal ? parseInt(groupIdVal) : null;
+  const dueDate = document.getElementById('todo-due-date').value || null;
+  const priority = document.getElementById('todo-priority').value || null;
   const now = Date.now();
-  todos.push({ id: now, text, description, completed: false, createdAt: now, groupId });
+  todos.push({ id: now, text, description, completed: false, createdAt: now, groupId, dueDate, priority });
   todoInput.value = '';
   todoDescInput.value = '';
   todoDescInput.style.display = 'none';
   descToggleBtn.textContent = '＋ 설명 추가';
+  document.getElementById('todo-due-date').value = '';
+  document.getElementById('todo-priority').value = '';
   render();
 }
 
@@ -296,6 +316,24 @@ function render() {
       span.className = 'todo-text';
       span.textContent = todo.text;
       topRow.appendChild(span);
+
+      if (todo.priority) {
+        const pb = document.createElement('span');
+        const pLabel = { high: '높음', normal: '보통', low: '낮음' }[todo.priority];
+        pb.className = `priority-badge priority-${todo.priority}`;
+        pb.textContent = pLabel;
+        topRow.appendChild(pb);
+      }
+
+      if (todo.dueDate && !todo.completed) {
+        const dday = getDday(todo.dueDate);
+        if (dday) {
+          const db = document.createElement('span');
+          db.className = `dday-badge ${dday.cls}`;
+          db.textContent = dday.label;
+          topRow.appendChild(db);
+        }
+      }
 
       if (todo.groupId && currentGroupFilter === null) {
         const group = groups.find(g => g.id === todo.groupId);

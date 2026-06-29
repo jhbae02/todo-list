@@ -278,6 +278,94 @@ body {
   color: #1a3678;
 }
 
+/* Due date + Priority extra row */
+.input-extra-row {
+  display: flex;
+  gap: 12px;
+}
+
+.input-extra-field {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex: 1;
+}
+
+.input-extra-label {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #7a8db3;
+  white-space: nowrap;
+}
+
+.todo-due-date {
+  flex: 1;
+  padding: 7px 10px;
+  border: 2px solid #c8d3ee;
+  border-radius: 8px;
+  font-size: 0.83rem;
+  color: #1a3678;
+  background: #f8f9fd;
+  outline: none;
+  transition: border-color 0.2s;
+  font-family: inherit;
+  min-width: 0;
+}
+
+.todo-due-date:focus {
+  border-color: #1a3678;
+  background: #fff;
+}
+
+.todo-priority-select {
+  flex: 1;
+  padding: 7px 10px;
+  border: 2px solid #c8d3ee;
+  border-radius: 8px;
+  font-size: 0.83rem;
+  color: #1a3678;
+  font-weight: 600;
+  background: #f8f9fd;
+  cursor: pointer;
+  outline: none;
+  transition: border-color 0.2s;
+  min-width: 0;
+}
+
+.todo-priority-select:focus {
+  border-color: #1a3678;
+}
+
+/* Priority badge */
+.priority-badge {
+  display: inline-block;
+  padding: 2px 7px;
+  border-radius: 8px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  flex-shrink: 0;
+  border: 1.5px solid transparent;
+}
+
+.priority-high  { background: #fde0e0; color: #c0392b; border-color: #f5a8a8; }
+.priority-normal{ background: #fef3cd; color: #b7700d; border-color: #f5dea0; }
+.priority-low   { background: #e0eeff; color: #2a5db0; border-color: #a0c0f0; }
+
+/* D-day badge */
+.dday-badge {
+  display: inline-block;
+  padding: 2px 7px;
+  border-radius: 8px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  flex-shrink: 0;
+  border: 1.5px solid transparent;
+}
+
+.dday-over  { background: #fde0e0; color: #c0392b; border-color: #f5a8a8; }
+.dday-today { background: #fef3cd; color: #b7700d; border-color: #f5dea0; }
+.dday-soon  { background: #d5f0de; color: #1a6e40; border-color: #96d5b0; }
+
 .todo-desc-input {
   width: 100%;
   padding: 10px 14px;
