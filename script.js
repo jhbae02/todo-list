@@ -658,6 +658,24 @@ searchClearBtn.addEventListener('click', () => {
   render();
 });
 
+// ── Theme ─────────────────────────────────────────────────
+const themeToggle = document.getElementById('theme-toggle');
+
+function applyTheme(theme) {
+  document.documentElement.setAttribute('data-theme', theme);
+  themeToggle.textContent = theme === 'dark' ? '☀️ 라이트' : '🌙 다크';
+  localStorage.setItem('tdl-theme', theme);
+}
+
+themeToggle.addEventListener('click', () => {
+  const next = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+  applyTheme(next);
+});
+
+const savedTheme = localStorage.getItem('tdl-theme')
+  || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+applyTheme(savedTheme);
+
 loadFromStorage();
 updateGroupUI();
 render();
