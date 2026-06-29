@@ -16,6 +16,7 @@ let currentFilter = 'all';
 let currentGroupFilter = null;
 let searchQuery = '';
 let draggedId = null;
+let editingId = null;
 
 const GROUP_COLORS = [
   { bg: '#dde5f7', text: '#2a4a9f', border: '#b0c2ee' },
@@ -289,6 +290,97 @@ function clearCompleted() {
   render();
 }
 
+// ── Inline editing ────────────────────────────────────────
+function startEdit(id) {
+  editingId = id;
+  render();
+}
+
+function cancelEdit() {
+  editingId = null;
+  render();
+}
+
+function saveEdit(id, text, description, dueDate, priority) {
+  const trimmed = text.trim();
+  if (!trimmed) return;
+  todos = todos.map(t => t.id !== id ? t : {
+    ...t,
+    text: trimmed,
+    description: description.trim() || null,
+    dueDate: dueDate || null,
+    priority: priority || null
+  });
+  editingId = null;
+  render();
+}
+
+function buildEditForm(todo) {
+  const form = document.createElement('div');
+  form.className = 'todo-edit-form';
+
+  const textInput = document.createElement('input');
+  textInput.type = 'text';
+  textInput.className = 'edit-input-text';
+  textInput.value = todo.text;
+  form.appendChild(textInput);
+
+  const extraRow = document.createElement('div');
+  extraRow.className = 'edit-extra-row';
+
+  const dateInput = document.createElement('input');
+  dateInput.type = 'date';
+  dateInput.className = 'edit-input-date';
+  dateInput.value = todo.dueDate || '';
+
+  const priorSel = document.createElement('select');
+  priorSel.className = 'edit-select-priority';
+  [['', '우선순위 없음'], ['high', '높음'], ['normal', '보통'], ['low', '낮음']].forEach(([val, label]) => {
+    const opt = document.createElement('option');
+    opt.value = val;
+    opt.textContent = label;
+    if ((todo.priority || '') === val) opt.selected = true;
+    priorSel.appendChild(opt);
+  });
+
+  extraRow.appendChild(dateInput);
+  extraRow.appendChild(priorSel);
+  form.appendChild(extraRow);
+
+  const descArea = document.createElement('textarea');
+  descArea.className = 'edit-textarea-desc';
+  descArea.placeholder = '설명 (선택사항)';
+  descArea.value = todo.description || '';
+  form.appendChild(descArea);
+
+  const actions = document.createElement('div');
+  actions.className = 'edit-actions';
+
+  const saveBtn = document.createElement('button');
+  saveBtn.className = 'edit-save-btn';
+  saveBtn.textContent = '저장';
+  saveBtn.addEventListener('click', () =>
+    saveEdit(todo.id, textInput.value, descArea.value, dateInput.value, priorSel.value)
+  );
+
+  const cancelBtn = document.createElement('button');
+  cancelBtn.className = 'edit-cancel-btn';
+  cancelBtn.textContent = '취소';
+  cancelBtn.addEventListener('click', cancelEdit);
+
+  actions.appendChild(saveBtn);
+  actions.appendChild(cancelBtn);
+  form.appendChild(actions);
+
+  textInput.addEventListener('keydown', e => {
+    if (e.key === 'Enter') saveBtn.click();
+    if (e.key === 'Escape') cancelEdit();
+  });
+
+  setTimeout(() => textInput.focus(), 0);
+  return form;
+}
+
 function render() {
   todoList.innerHTML = '';
   const filtered = getFiltered();
@@ -319,8 +411,18 @@ function render() {
   } else {
     filtered.forEach(todo => {
       const li = document.createElement('li');
-      li.className = 'todo-item' + (todo.completed ? ' completed' : '');
+      li.className = 'todo-item'
+        + (todo.completed ? ' completed' : '')
+        + (todo.id === editingId ? ' editing' : '');
 
+      // ── Edit mode ─────────────────────────────────────────
+      if (todo.id === editingId) {
+        li.appendChild(buildEditForm(todo));
+        todoList.appendChild(li);
+        return;
+      }
+
+      // ── Normal mode ───────────────────────────────────────
       li.setAttribute('draggable', 'true');
       li.dataset.id = todo.id;
       li.addEventListener('dragstart', e => {
@@ -373,6 +475,7 @@ function render() {
 
       const span = document.createElement('span');
       span.className = 'todo-text';
+      span.addEventListener('dblclick', () => startEdit(todo.id));
       const q = searchQuery.trim();
       const highlighted = highlightText(todo.text, q);
       if (highlighted) {
@@ -413,6 +516,14 @@ function render() {
           topRow.appendChild(badge);
         }
       }
+
+      // Edit button (hover)
+      const editBtn = document.createElement('button');
+      editBtn.className = 'edit-btn';
+      editBtn.title = '수정 (더블클릭도 가능)';
+      editBtn.textContent = '✏';
+      editBtn.addEventListener('click', () => startEdit(todo.id));
+      topRow.appendChild(editBtn);
 
       if (todo.description) {
         const descBtn = document.createElement('button');

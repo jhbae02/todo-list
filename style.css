@@ -835,3 +835,141 @@ body {
   border-color: #1a3678;
   color: #1a3678;
 }
+
+/* ── Inline Edit ───────────────────────────────────────── */
+.edit-btn {
+  background: none;
+  border: none;
+  color: #c8d3ee;
+  font-size: 0.78rem;
+  cursor: pointer;
+  padding: 2px 5px;
+  border-radius: 4px;
+  opacity: 0;
+  flex-shrink: 0;
+  transition: opacity 0.15s, background 0.15s, color 0.15s;
+}
+
+.todo-item:hover .edit-btn {
+  opacity: 1;
+}
+
+.edit-btn:hover {
+  background: #e8edf8;
+  color: #1a3678;
+}
+
+.todo-item.editing {
+  background: #f0f4ff;
+  border-radius: 10px;
+  padding: 12px 8px;
+  border-bottom: none;
+  margin-bottom: 2px;
+}
+
+.todo-edit-form {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.edit-input-text {
+  width: 100%;
+  padding: 8px 12px;
+  border: 2px solid #1a3678;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #1a3678;
+  background: #fff;
+  outline: none;
+  font-family: inherit;
+}
+
+.edit-extra-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.edit-input-date,
+.edit-select-priority {
+  flex: 1;
+  padding: 6px 10px;
+  border: 2px solid #c8d3ee;
+  border-radius: 8px;
+  font-size: 0.83rem;
+  color: #1a3678;
+  background: #f8f9fd;
+  outline: none;
+  transition: border-color 0.2s;
+  font-family: inherit;
+  min-width: 0;
+}
+
+.edit-input-date:focus,
+.edit-select-priority:focus {
+  border-color: #1a3678;
+  background: #fff;
+}
+
+.edit-textarea-desc {
+  width: 100%;
+  padding: 8px 12px;
+  border: 2px solid #c8d3ee;
+  border-radius: 8px;
+  font-size: 0.88rem;
+  color: #2d3a5e;
+  background: #f8f9fd;
+  resize: vertical;
+  min-height: 54px;
+  outline: none;
+  font-family: inherit;
+  transition: border-color 0.2s;
+  box-sizing: border-box;
+}
+
+.edit-textarea-desc:focus {
+  border-color: #1a3678;
+  background: #fff;
+}
+
+.edit-actions {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+}
+
+.edit-save-btn {
+  padding: 6px 18px;
+  background: #1a3678;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.88rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.edit-save-btn:hover {
+  background: #25479e;
+}
+
+.edit-cancel-btn {
+  padding: 6px 14px;
+  background: none;
+  border: 2px solid #c8d3ee;
+  border-radius: 8px;
+  color: #7a8db3;
+  font-size: 0.88rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: border-color 0.15s, color 0.15s;
+}
+
+.edit-cancel-btn:hover {
+  border-color: #1a3678;
+  color: #1a3678;
+}
