@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TODO List</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1 class="title">TODO List</h1>
+      <p class="subtitle">오늘 할 일을 정리해보세요</p>
+    </div>
+
+    <div class="input-area">
+      <input type="text" id="todo-input" class="todo-input" placeholder="할 일을 입력하세요">
+      <button id="add-btn" class="add-btn">추가</button>
+    </div>
+
+    <div class="tabs">
+      <button class="tab active" data-filter="all">전체 <span class="tab-count" id="count-all">0</span></button>
+      <button class="tab" data-filter="active">진행 중 <span class="tab-count" id="count-active">0</span></button>
+      <button class="tab" data-filter="completed">완료 <span class="tab-count" id="count-completed">0</span></button>
+    </div>
+
+    <div id="select-all-bar" class="select-all-bar" style="display:none;">
+      <label class="select-all-label">
+        <input type="checkbox" id="select-all-checkbox">
+        <span>진행 중 전체 선택</span>
+      </label>
+    </div>
+
+    <ul id="todo-list" class="todo-list"></ul>
+
+    <div class="footer">
+      <span id="remaining-count" class="remaining-count">0개 남음</span>
+      <button id="clear-completed-btn" class="clear-btn">완료 항목 삭제</button>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
