@@ -14,6 +14,7 @@ let groups = [];
 let nextGroupId = 1;
 let currentFilter = 'all';
 let currentGroupFilter = null;
+let searchQuery = '';
 
 const GROUP_COLORS = [
   { bg: '#dde5f7', text: '#2a4a9f', border: '#b0c2ee' },
@@ -214,15 +215,33 @@ function getDday(dueDateStr) {
 }
 
 function getFiltered() {
+  const q = searchQuery.trim().toLowerCase();
   return todos
     .filter(t => {
       const statusMatch = currentFilter === 'active' ? !t.completed
         : currentFilter === 'completed' ? t.completed
         : true;
       const groupMatch = currentGroupFilter === null ? true : t.groupId === currentGroupFilter;
-      return statusMatch && groupMatch;
+      const searchMatch = !q
+        || t.text.toLowerCase().includes(q)
+        || (t.description && t.description.toLowerCase().includes(q));
+      return statusMatch && groupMatch && searchMatch;
     })
     .sort((a, b) => (PRIORITY_ORDER[a.priority || ''] - PRIORITY_ORDER[b.priority || '']));
+}
+
+function highlightText(text, query) {
+  if (!query) return null;
+  const idx = text.toLowerCase().indexOf(query.toLowerCase());
+  if (idx === -1) return null;
+  const frag = document.createDocumentFragment();
+  frag.appendChild(document.createTextNode(text.slice(0, idx)));
+  const mark = document.createElement('mark');
+  mark.className = 'search-highlight';
+  mark.textContent = text.slice(idx, idx + query.length);
+  frag.appendChild(mark);
+  frag.appendChild(document.createTextNode(text.slice(idx + query.length)));
+  return frag;
 }
 
 function addTodo() {
@@ -314,7 +333,13 @@ function render() {
 
       const span = document.createElement('span');
       span.className = 'todo-text';
-      span.textContent = todo.text;
+      const q = searchQuery.trim();
+      const highlighted = highlightText(todo.text, q);
+      if (highlighted) {
+        span.appendChild(highlighted);
+      } else {
+        span.textContent = todo.text;
+      }
       topRow.appendChild(span);
 
       if (todo.priority) {
@@ -460,6 +485,26 @@ tabs.forEach(tab => {
 });
 
 clearCompletedBtn.addEventListener('click', clearCompleted);
+
+const searchInput = document.getElementById('search-input');
+const searchClearBtn = document.getElementById('search-clear-btn');
+
+searchInput.addEventListener('input', () => {
+  searchQuery = searchInput.value;
+  const hasVal = searchQuery.trim() !== '';
+  searchClearBtn.style.display = hasVal ? 'inline-block' : 'none';
+  searchInput.classList.toggle('has-value', hasVal);
+  render();
+});
+
+searchClearBtn.addEventListener('click', () => {
+  searchQuery = '';
+  searchInput.value = '';
+  searchInput.classList.remove('has-value');
+  searchClearBtn.style.display = 'none';
+  searchInput.focus();
+  render();
+});
 
 loadFromStorage();
 updateGroupUI();

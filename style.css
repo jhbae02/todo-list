@@ -62,6 +62,7 @@ body {
 
 /* Content area below header */
 .group-manager,
+.search-bar,
 .group-filter-row,
 .input-area,
 .tabs,
@@ -69,6 +70,66 @@ body {
 .footer {
   padding-left: 36px;
   padding-right: 36px;
+}
+
+/* Search bar */
+.search-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding-top: 18px;
+  padding-bottom: 0;
+}
+
+.search-icon {
+  font-size: 1rem;
+  color: #7a8db3;
+  flex-shrink: 0;
+}
+
+.search-input {
+  flex: 1;
+  padding: 8px 12px;
+  border: 2px solid #c8d3ee;
+  border-radius: 20px;
+  font-size: 0.9rem;
+  color: #1a3678;
+  background: #f8f9fd;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.search-input:focus {
+  border-color: #1a3678;
+  background: #fff;
+}
+
+.search-input.has-value {
+  border-color: #1a3678;
+  background: #fff;
+}
+
+.search-clear-btn {
+  background: none;
+  border: none;
+  color: #7a8db3;
+  font-size: 1.2rem;
+  cursor: pointer;
+  padding: 2px 6px;
+  border-radius: 50%;
+  line-height: 1;
+  transition: background 0.15s;
+}
+
+.search-clear-btn:hover {
+  background: #e8edf8;
+  color: #1a3678;
+}
+
+.search-highlight {
+  background: #ffe88a;
+  border-radius: 3px;
+  padding: 0 1px;
 }
 
 /* Group filter row */
