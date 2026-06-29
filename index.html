@@ -65,7 +65,28 @@
           <option value="">그룹 없음</option>
         </select>
       </div>
+      <div class="input-extra-row">
+        <div class="input-extra-field">
+          <label class="input-extra-label" for="todo-due-date">마감일</label>
+          <input type="date" id="todo-due-date" class="todo-due-date">
+        </div>
+        <div class="input-extra-field">
+          <label class="input-extra-label" for="todo-priority">우선순위</label>
+          <select id="todo-priority" class="todo-priority-select">
+            <option value="">없음</option>
+            <option value="high">높음</option>
+            <option value="normal">보통</option>
+            <option value="low">낮음</option>
+          </select>
+        </div>
+      </div>
       <textarea id="todo-desc-input" class="todo-desc-input" placeholder="설명을 입력하세요 (선택사항)" style="display:none;"></textarea>
+    </div>
+
+    <div class="search-bar">
+      <span class="search-icon">&#128269;</span>
+      <input type="text" id="search-input" class="search-input" placeholder="키워드로 검색…">
+      <button id="search-clear-btn" class="search-clear-btn" style="display:none;">×</button>
     </div>
 
     <div id="group-filter-row" class="group-filter-row" style="display:none;"></div>

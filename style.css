@@ -62,6 +62,7 @@ body {
 
 /* Content area below header */
 .group-manager,
+.search-bar,
 .group-filter-row,
 .input-area,
 .tabs,
@@ -69,6 +70,66 @@ body {
 .footer {
   padding-left: 36px;
   padding-right: 36px;
+}
+
+/* Search bar */
+.search-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding-top: 18px;
+  padding-bottom: 0;
+}
+
+.search-icon {
+  font-size: 1rem;
+  color: #7a8db3;
+  flex-shrink: 0;
+}
+
+.search-input {
+  flex: 1;
+  padding: 8px 12px;
+  border: 2px solid #c8d3ee;
+  border-radius: 20px;
+  font-size: 0.9rem;
+  color: #1a3678;
+  background: #f8f9fd;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.search-input:focus {
+  border-color: #1a3678;
+  background: #fff;
+}
+
+.search-input.has-value {
+  border-color: #1a3678;
+  background: #fff;
+}
+
+.search-clear-btn {
+  background: none;
+  border: none;
+  color: #7a8db3;
+  font-size: 1.2rem;
+  cursor: pointer;
+  padding: 2px 6px;
+  border-radius: 50%;
+  line-height: 1;
+  transition: background 0.15s;
+}
+
+.search-clear-btn:hover {
+  background: #e8edf8;
+  color: #1a3678;
+}
+
+.search-highlight {
+  background: #ffe88a;
+  border-radius: 3px;
+  padding: 0 1px;
 }
 
 /* Group filter row */
@@ -278,6 +339,94 @@ body {
   color: #1a3678;
 }
 
+/* Due date + Priority extra row */
+.input-extra-row {
+  display: flex;
+  gap: 12px;
+}
+
+.input-extra-field {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex: 1;
+}
+
+.input-extra-label {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #7a8db3;
+  white-space: nowrap;
+}
+
+.todo-due-date {
+  flex: 1;
+  padding: 7px 10px;
+  border: 2px solid #c8d3ee;
+  border-radius: 8px;
+  font-size: 0.83rem;
+  color: #1a3678;
+  background: #f8f9fd;
+  outline: none;
+  transition: border-color 0.2s;
+  font-family: inherit;
+  min-width: 0;
+}
+
+.todo-due-date:focus {
+  border-color: #1a3678;
+  background: #fff;
+}
+
+.todo-priority-select {
+  flex: 1;
+  padding: 7px 10px;
+  border: 2px solid #c8d3ee;
+  border-radius: 8px;
+  font-size: 0.83rem;
+  color: #1a3678;
+  font-weight: 600;
+  background: #f8f9fd;
+  cursor: pointer;
+  outline: none;
+  transition: border-color 0.2s;
+  min-width: 0;
+}
+
+.todo-priority-select:focus {
+  border-color: #1a3678;
+}
+
+/* Priority badge */
+.priority-badge {
+  display: inline-block;
+  padding: 2px 7px;
+  border-radius: 8px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  flex-shrink: 0;
+  border: 1.5px solid transparent;
+}
+
+.priority-high  { background: #fde0e0; color: #c0392b; border-color: #f5a8a8; }
+.priority-normal{ background: #fef3cd; color: #b7700d; border-color: #f5dea0; }
+.priority-low   { background: #e0eeff; color: #2a5db0; border-color: #a0c0f0; }
+
+/* D-day badge */
+.dday-badge {
+  display: inline-block;
+  padding: 2px 7px;
+  border-radius: 8px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  flex-shrink: 0;
+  border: 1.5px solid transparent;
+}
+
+.dday-over  { background: #fde0e0; color: #c0392b; border-color: #f5a8a8; }
+.dday-today { background: #fef3cd; color: #b7700d; border-color: #f5dea0; }
+.dday-soon  { background: #d5f0de; color: #1a6e40; border-color: #96d5b0; }
+
 .todo-desc-input {
   width: 100%;
   padding: 10px 14px;
@@ -397,6 +546,22 @@ body {
   margin-bottom: 24px;
 }
 
+.drag-handle {
+  color: #c8d3ee;
+  cursor: grab;
+  font-size: 0.85rem;
+  letter-spacing: -3px;
+  line-height: 1;
+  padding: 0 2px;
+  user-select: none;
+  flex-shrink: 0;
+  transition: color 0.15s;
+}
+
+.drag-handle:hover {
+  color: #7a8db3;
+}
+
 .todo-item {
   display: flex;
   align-items: center;
@@ -464,6 +629,16 @@ body {
 .todo-item.completed .todo-text {
   text-decoration: line-through;
   color: #b0b9d0;
+}
+
+.todo-item.dragging {
+  opacity: 0.4;
+  cursor: grabbing;
+}
+
+.todo-item.drag-over {
+  border-top: 2px solid #1a3678;
+  background: #f0f4ff;
 }
 
 .todo-top-row {

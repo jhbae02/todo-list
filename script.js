@@ -14,6 +14,8 @@ let groups = [];
 let nextGroupId = 1;
 let currentFilter = 'all';
 let currentGroupFilter = null;
+let searchQuery = '';
+let draggedId = null;
 
 const GROUP_COLORS = [
   { bg: '#dde5f7', text: '#2a4a9f', border: '#b0c2ee' },
@@ -199,14 +201,48 @@ const EMPTY_SVG = `
   <path d="M65 72l4.5 4.5 9-9" stroke="white" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/>
 </svg>`;
 
+const PRIORITY_ORDER = { high: 0, normal: 1, low: 2, '': 3 };
+
+function getDday(dueDateStr) {
+  if (!dueDateStr) return null;
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const due = new Date(dueDateStr);
+  due.setHours(0, 0, 0, 0);
+  const diff = Math.round((due - today) / (1000 * 60 * 60 * 24));
+  if (diff < 0) return { label: `D+${Math.abs(diff)}`, cls: 'dday-over' };
+  if (diff === 0) return { label: 'D-Day', cls: 'dday-today' };
+  return { label: `D-${diff}`, cls: 'dday-soon' };
+}
+
 function getFiltered() {
-  return todos.filter(t => {
-    const statusMatch = currentFilter === 'active' ? !t.completed
-      : currentFilter === 'completed' ? t.completed
-      : true;
-    const groupMatch = currentGroupFilter === null ? true : t.groupId === currentGroupFilter;
-    return statusMatch && groupMatch;
-  });
+  const q = searchQuery.trim().toLowerCase();
+  return todos
+    .filter(t => {
+      const statusMatch = currentFilter === 'active' ? !t.completed
+        : currentFilter === 'completed' ? t.completed
+        : true;
+      const groupMatch = currentGroupFilter === null ? true : t.groupId === currentGroupFilter;
+      const searchMatch = !q
+        || t.text.toLowerCase().includes(q)
+        || (t.description && t.description.toLowerCase().includes(q));
+      return statusMatch && groupMatch && searchMatch;
+    })
+    .sort((a, b) => (PRIORITY_ORDER[a.priority || ''] - PRIORITY_ORDER[b.priority || '']));
+}
+
+function highlightText(text, query) {
+  if (!query) return null;
+  const idx = text.toLowerCase().indexOf(query.toLowerCase());
+  if (idx === -1) return null;
+  const frag = document.createDocumentFragment();
+  frag.appendChild(document.createTextNode(text.slice(0, idx)));
+  const mark = document.createElement('mark');
+  mark.className = 'search-highlight';
+  mark.textContent = text.slice(idx, idx + query.length);
+  frag.appendChild(mark);
+  frag.appendChild(document.createTextNode(text.slice(idx + query.length)));
+  return frag;
 }
 
 function addTodo() {
@@ -215,12 +251,16 @@ function addTodo() {
   const description = todoDescInput.value.trim();
   const groupIdVal = document.getElementById('todo-group-select').value;
   const groupId = groupIdVal ? parseInt(groupIdVal) : null;
+  const dueDate = document.getElementById('todo-due-date').value || null;
+  const priority = document.getElementById('todo-priority').value || null;
   const now = Date.now();
-  todos.push({ id: now, text, description, completed: false, createdAt: now, groupId });
+  todos.push({ id: now, text, description, completed: false, createdAt: now, groupId, dueDate, priority });
   todoInput.value = '';
   todoDescInput.value = '';
   todoDescInput.style.display = 'none';
   descToggleBtn.textContent = '＋ 설명 추가';
+  document.getElementById('todo-due-date').value = '';
+  document.getElementById('todo-priority').value = '';
   render();
 }
 
@@ -281,6 +321,45 @@ function render() {
       const li = document.createElement('li');
       li.className = 'todo-item' + (todo.completed ? ' completed' : '');
 
+      li.setAttribute('draggable', 'true');
+      li.dataset.id = todo.id;
+      li.addEventListener('dragstart', e => {
+        draggedId = todo.id;
+        li.classList.add('dragging');
+        e.dataTransfer.effectAllowed = 'move';
+      });
+      li.addEventListener('dragend', () => {
+        draggedId = null;
+        li.classList.remove('dragging');
+        document.querySelectorAll('.todo-item.drag-over').forEach(el => el.classList.remove('drag-over'));
+      });
+      li.addEventListener('dragover', e => {
+        e.preventDefault();
+        if (draggedId === todo.id) return;
+        e.dataTransfer.dropEffect = 'move';
+        document.querySelectorAll('.todo-item.drag-over').forEach(el => el.classList.remove('drag-over'));
+        li.classList.add('drag-over');
+      });
+      li.addEventListener('dragleave', e => {
+        if (!li.contains(e.relatedTarget)) li.classList.remove('drag-over');
+      });
+      li.addEventListener('drop', e => {
+        e.preventDefault();
+        li.classList.remove('drag-over');
+        if (!draggedId || draggedId === todo.id) return;
+        const fromIdx = todos.findIndex(t => t.id === draggedId);
+        const toIdx = todos.findIndex(t => t.id === todo.id);
+        if (fromIdx === -1 || toIdx === -1) return;
+        const [moved] = todos.splice(fromIdx, 1);
+        todos.splice(toIdx, 0, moved);
+        render();
+      });
+
+      const dragHandle = document.createElement('span');
+      dragHandle.className = 'drag-handle';
+      dragHandle.innerHTML = '&#8942;&#8942;';
+      dragHandle.title = '드래그하여 순서 변경';
+
       const checkbox = document.createElement('input');
       checkbox.type = 'checkbox';
       checkbox.checked = todo.completed;
@@ -294,8 +373,32 @@ function render() {
 
       const span = document.createElement('span');
       span.className = 'todo-text';
-      span.textContent = todo.text;
+      const q = searchQuery.trim();
+      const highlighted = highlightText(todo.text, q);
+      if (highlighted) {
+        span.appendChild(highlighted);
+      } else {
+        span.textContent = todo.text;
+      }
       topRow.appendChild(span);
+
+      if (todo.priority) {
+        const pb = document.createElement('span');
+        const pLabel = { high: '높음', normal: '보통', low: '낮음' }[todo.priority];
+        pb.className = `priority-badge priority-${todo.priority}`;
+        pb.textContent = pLabel;
+        topRow.appendChild(pb);
+      }
+
+      if (todo.dueDate && !todo.completed) {
+        const dday = getDday(todo.dueDate);
+        if (dday) {
+          const db = document.createElement('span');
+          db.className = `dday-badge ${dday.cls}`;
+          db.textContent = dday.label;
+          topRow.appendChild(db);
+        }
+      }
 
       if (todo.groupId && currentGroupFilter === null) {
         const group = groups.find(g => g.id === todo.groupId);
@@ -360,6 +463,7 @@ function render() {
       delBtn.title = '삭제';
       delBtn.addEventListener('click', () => deleteTodo(todo.id));
 
+      li.appendChild(dragHandle);
       li.appendChild(checkbox);
       li.appendChild(textWrap);
       li.appendChild(delBtn);
@@ -422,6 +526,26 @@ tabs.forEach(tab => {
 });
 
 clearCompletedBtn.addEventListener('click', clearCompleted);
+
+const searchInput = document.getElementById('search-input');
+const searchClearBtn = document.getElementById('search-clear-btn');
+
+searchInput.addEventListener('input', () => {
+  searchQuery = searchInput.value;
+  const hasVal = searchQuery.trim() !== '';
+  searchClearBtn.style.display = hasVal ? 'inline-block' : 'none';
+  searchInput.classList.toggle('has-value', hasVal);
+  render();
+});
+
+searchClearBtn.addEventListener('click', () => {
+  searchQuery = '';
+  searchInput.value = '';
+  searchInput.classList.remove('has-value');
+  searchClearBtn.style.display = 'none';
+  searchInput.focus();
+  render();
+});
 
 loadFromStorage();
 updateGroupUI();
