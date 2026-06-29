@@ -1,0 +1,7 @@
+{
+  "permissions": {
+    "allow": [
+      "PowerShell($env:PATH = [System.Environment]::GetEnvironmentVariable\\(\"PATH\",\"Machine\"\\) + \";\" + [System.Environment]::GetEnvironmentVariable\\(\"PATH\",\"User\"\\); Set-Location \"C:\\\\Users\\\\user\\\\Downloads\\\\todo-list\"; git add -A; git commit -m \"feat: add group management, group assignment, and group filter view\"; git push)"
+    ]
+  }
+}

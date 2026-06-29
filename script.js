@@ -10,8 +10,117 @@ const descToggleBtn = document.getElementById('desc-toggle-btn');
 const todoDescInput = document.getElementById('todo-desc-input');
 
 let todos = [];
+let groups = [];
+let nextGroupId = 1;
 let currentFilter = 'all';
+let currentGroupFilter = null;
 
+// ── Group management ──────────────────────────────────────────
+function addGroup(name) {
+  const trimmed = name.trim();
+  if (!trimmed || groups.some(g => g.name === trimmed)) return;
+  groups.push({ id: nextGroupId++, name: trimmed });
+  updateGroupUI();
+}
+
+function deleteGroup(id) {
+  groups = groups.filter(g => g.id !== id);
+  todos = todos.map(t => t.groupId === id ? { ...t, groupId: null } : t);
+  if (currentGroupFilter === id) {
+    currentGroupFilter = null;
+    renderGroupFilter();
+  }
+  updateGroupUI();
+  render();
+}
+
+function updateGroupUI() {
+  renderGroupChips();
+  renderGroupSelect();
+  renderGroupFilter();
+}
+
+function renderGroupChips() {
+  const chips = document.getElementById('group-chips');
+  chips.innerHTML = '';
+  if (groups.length === 0) {
+    chips.innerHTML = '<span class="no-groups-hint">아직 그룹이 없습니다</span>';
+    return;
+  }
+  groups.forEach(g => {
+    const chip = document.createElement('div');
+    chip.className = 'group-chip';
+    const nameEl = document.createElement('span');
+    nameEl.textContent = g.name;
+    const delBtn = document.createElement('button');
+    delBtn.className = 'group-chip-del';
+    delBtn.textContent = '×';
+    delBtn.title = '그룹 삭제';
+    delBtn.addEventListener('click', () => deleteGroup(g.id));
+    chip.appendChild(nameEl);
+    chip.appendChild(delBtn);
+    chips.appendChild(chip);
+  });
+}
+
+function renderGroupSelect() {
+  const select = document.getElementById('todo-group-select');
+  const cur = select.value;
+  select.innerHTML = '<option value="">그룹 없음</option>';
+  groups.forEach(g => {
+    const opt = document.createElement('option');
+    opt.value = g.id;
+    opt.textContent = g.name;
+    select.appendChild(opt);
+  });
+  select.value = cur;
+}
+
+function renderGroupFilter() {
+  const row = document.getElementById('group-filter-row');
+  if (!row) return;
+  row.innerHTML = '';
+  row.style.display = groups.length > 0 ? 'flex' : 'none';
+
+  const allBtn = document.createElement('button');
+  allBtn.className = 'group-filter-btn' + (currentGroupFilter === null ? ' active' : '');
+  allBtn.textContent = '전체';
+  allBtn.addEventListener('click', () => { currentGroupFilter = null; renderGroupFilter(); render(); });
+  row.appendChild(allBtn);
+
+  groups.forEach(g => {
+    const btn = document.createElement('button');
+    btn.className = 'group-filter-btn' + (currentGroupFilter === g.id ? ' active' : '');
+    btn.textContent = g.name;
+    btn.addEventListener('click', () => { currentGroupFilter = g.id; renderGroupFilter(); render(); });
+    row.appendChild(btn);
+  });
+}
+
+// Group manager toggle
+document.getElementById('group-manager-toggle').addEventListener('click', () => {
+  const body = document.getElementById('group-manager-body');
+  const icon = document.getElementById('group-manager-icon');
+  const isHidden = body.style.display === 'none';
+  body.style.display = isHidden ? 'block' : 'none';
+  icon.textContent = isHidden ? '▴' : '▾';
+});
+
+// Group add
+document.getElementById('group-add-btn').addEventListener('click', () => {
+  const input = document.getElementById('group-input');
+  addGroup(input.value);
+  input.value = '';
+});
+
+document.getElementById('group-input').addEventListener('keydown', e => {
+  if (e.key === 'Enter') {
+    addGroup(e.target.value);
+    e.target.value = '';
+  }
+});
+
+// ── Description toggle ────────────────────────────────────────
 descToggleBtn.addEventListener('click', () => {
   const isHidden = todoDescInput.style.display === 'none';
   todoDescInput.style.display = isHidden ? 'block' : 'none';
@@ -33,9 +142,11 @@ const EMPTY_SVG = `
 
 function getFiltered() {
   return todos.filter(t => {
-    if (currentFilter === 'active') return !t.completed;
-    if (currentFilter === 'completed') return t.completed;
-    return true;
+    const statusMatch = currentFilter === 'active' ? !t.completed
+      : currentFilter === 'completed' ? t.completed
+      : true;
+    const groupMatch = currentGroupFilter === null ? true : t.groupId === currentGroupFilter;
+    return statusMatch && groupMatch;
   });
 }
 
@@ -43,8 +154,10 @@ function addTodo() {
   const text = todoInput.value.trim();
   if (!text) return;
   const description = todoDescInput.value.trim();
+  const groupIdVal = document.getElementById('todo-group-select').value;
+  const groupId = groupIdVal ? parseInt(groupIdVal) : null;
   const now = Date.now();
-  todos.push({ id: now, text, description, completed: false, createdAt: now });
+  todos.push({ id: now, text, description, completed: false, createdAt: now, groupId });
   todoInput.value = '';
   todoDescInput.value = '';
   todoDescInput.style.display = 'none';
@@ -91,10 +204,14 @@ function render() {
         <p class="empty-title">할 일을 추가해보세요!</p>
         <p class="empty-desc">위 입력창에 할 일을 입력하고<br>추가 버튼을 눌러보세요</p>`;
     } else {
+      const groupName = currentGroupFilter !== null
+        ? (groups.find(g => g.id === currentGroupFilter) || {}).name
+        : null;
+      const prefix = groupName ? `[${groupName}] ` : '';
       const msg = {
-        active: '진행 중인 항목이 없습니다',
-        completed: '완료된 항목이 없습니다',
-        all: '항목이 없습니다'
+        active: `${prefix}진행 중인 항목이 없습니다`,
+        completed: `${prefix}완료된 항목이 없습니다`,
+        all: `${prefix}항목이 없습니다`
       };
       li.innerHTML = `<p class="empty-title">${msg[currentFilter]}</p>`;
     }
@@ -120,6 +237,16 @@ function render() {
       span.className = 'todo-text';
       span.textContent = todo.text;
       topRow.appendChild(span);
+
+      if (todo.groupId && currentGroupFilter === null) {
+        const group = groups.find(g => g.id === todo.groupId);
+        if (group) {
+          const badge = document.createElement('span');
+          badge.className = 'group-badge';
+          badge.textContent = group.name;
+          topRow.appendChild(badge);
+        }
+      }
 
       if (todo.description) {
         const descBtn = document.createElement('button');

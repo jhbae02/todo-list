@@ -39,15 +39,36 @@
       </div>
     </div>
 
-    
+    <div class="group-manager">
+      <button id="group-manager-toggle" class="group-manager-toggle">
+        그룹 관리 <span id="group-manager-icon">▾</span>
+      </button>
+      <div id="group-manager-body" class="group-manager-body" style="display:none;">
+        <div class="group-add-row">
+          <input type="text" id="group-input" class="group-input" placeholder="그룹 이름을 입력하세요">
+          <button id="group-add-btn" class="group-add-btn">추가</button>
+        </div>
+        <div id="group-chips" class="group-chips">
+          <span class="no-groups-hint">아직 그룹이 없습니다</span>
+        </div>
+      </div>
+    </div>
+
     <div class="input-area">
       <div class="input-row">
         <input type="text" id="todo-input" class="todo-input" placeholder="할 일을 입력하세요">
         <button id="add-btn" class="add-btn">추가</button>
       </div>
-      <button id="desc-toggle-btn" class="desc-toggle-btn">＋ 설명 추가</button>
+      <div class="input-meta-row">
+        <button id="desc-toggle-btn" class="desc-toggle-btn">＋ 설명 추가</button>
+        <select id="todo-group-select" class="todo-group-select">
+          <option value="">그룹 없음</option>
+        </select>
+      </div>
       <textarea id="todo-desc-input" class="todo-desc-input" placeholder="설명을 입력하세요 (선택사항)" style="display:none;"></textarea>
     </div>
+
+    <div id="group-filter-row" class="group-filter-row" style="display:none;"></div>
 
     <div class="tabs">
       <button class="tab active" data-filter="all">전체 <span class="tab-count" id="count-all">0</span></button>
