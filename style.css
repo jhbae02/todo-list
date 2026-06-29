@@ -93,22 +93,14 @@ body {
 }
 
 .group-filter-btn:hover {
-  border-color: #1a3678;
-  color: #1a3678;
-}
-
-.group-filter-btn.active {
-  background: #1a3678;
-  border-color: #1a3678;
-  color: #fff;
+  opacity: 0.82;
 }
 
 /* Group badge on todo item */
 .group-badge {
   display: inline-block;
   padding: 2px 8px;
-  background: #e8edf8;
-  color: #1a3678;
+  border: 1.5px solid transparent;
   border-radius: 10px;
   font-size: 0.72rem;
   font-weight: 700;
@@ -208,11 +200,10 @@ body {
   align-items: center;
   gap: 6px;
   padding: 4px 10px 4px 12px;
-  background: #e8edf8;
+  border: 1.5px solid transparent;
   border-radius: 20px;
   font-size: 0.85rem;
   font-weight: 600;
-  color: #1a3678;
 }
 
 .group-chip-del {

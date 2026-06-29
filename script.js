@@ -15,11 +15,23 @@ let nextGroupId = 1;
 let currentFilter = 'all';
 let currentGroupFilter = null;
 
+const GROUP_COLORS = [
+  { bg: '#dde5f7', text: '#2a4a9f', border: '#b0c2ee' },
+  { bg: '#d3efed', text: '#1a6b68', border: '#96d0cc' },
+  { bg: '#e8dff7', text: '#6530b0', border: '#c5b5eb' },
+  { bg: '#d5f0de', text: '#1a6e40', border: '#96d5b0' },
+  { bg: '#fde8d3', text: '#a84810', border: '#f5c09a' },
+  { bg: '#fddce6', text: '#a81e4e', border: '#f5a6c0' },
+  { bg: '#fdf2d0', text: '#7a5800', border: '#f0dc96' },
+  { bg: '#dff0ff', text: '#1a5888', border: '#96c8e8' },
+];
+
 // ── Group management ──────────────────────────────────────────
 function addGroup(name) {
   const trimmed = name.trim();
   if (!trimmed || groups.some(g => g.name === trimmed)) return;
-  groups.push({ id: nextGroupId++, name: trimmed });
+  const colorIndex = groups.length % GROUP_COLORS.length;
+  groups.push({ id: nextGroupId++, name: trimmed, colorIndex });
   updateGroupUI();
 }
 
@@ -48,12 +60,17 @@ function renderGroupChips() {
     return;
   }
   groups.forEach(g => {
+    const c = GROUP_COLORS[g.colorIndex];
     const chip = document.createElement('div');
     chip.className = 'group-chip';
+    chip.style.background = c.bg;
+    chip.style.color = c.text;
+    chip.style.borderColor = c.border;
     const nameEl = document.createElement('span');
     nameEl.textContent = g.name;
     const delBtn = document.createElement('button');
     delBtn.className = 'group-chip-del';
+    delBtn.style.color = c.text;
     delBtn.textContent = '×';
     delBtn.title = '그룹 삭제';
     delBtn.addEventListener('click', () => deleteGroup(g.id));
@@ -76,6 +93,20 @@ function renderGroupSelect() {
   select.value = cur;
 }
 
+function applyGroupBtnStyle(btn, c, isActive) {
+  if (isActive) {
+    btn.style.background = c.bg;
+    btn.style.borderColor = c.border;
+    btn.style.color = c.text;
+    btn.style.boxShadow = `0 2px 8px ${c.border}`;
+  } else {
+    btn.style.background = '#fff';
+    btn.style.borderColor = c.border;
+    btn.style.color = c.text;
+    btn.style.boxShadow = '';
+  }
+}
+
 function renderGroupFilter() {
   const row = document.getElementById('group-filter-row');
   if (!row) return;
@@ -83,14 +114,21 @@ function renderGroupFilter() {
   row.style.display = groups.length > 0 ? 'flex' : 'none';
 
   const allBtn = document.createElement('button');
-  allBtn.className = 'group-filter-btn' + (currentGroupFilter === null ? ' active' : '');
+  allBtn.className = 'group-filter-btn';
   allBtn.textContent = '전체';
+  const allActive = currentGroupFilter === null;
+  allBtn.style.background = allActive ? '#1a3678' : '#fff';
+  allBtn.style.borderColor = allActive ? '#1a3678' : '#c8d3ee';
+  allBtn.style.color = allActive ? '#fff' : '#7a8db3';
+  allBtn.style.boxShadow = allActive ? '0 2px 8px rgba(26,54,120,0.18)' : '';
   allBtn.addEventListener('click', () => { currentGroupFilter = null; renderGroupFilter(); render(); });
   row.appendChild(allBtn);
 
   groups.forEach(g => {
+    const c = GROUP_COLORS[g.colorIndex];
     const btn = document.createElement('button');
-    btn.className = 'group-filter-btn' + (currentGroupFilter === g.id ? ' active' : '');
+    btn.className = 'group-filter-btn';
+    applyGroupBtnStyle(btn, c, currentGroupFilter === g.id);
     btn.textContent = g.name;
     btn.addEventListener('click', () => { currentGroupFilter = g.id; renderGroupFilter(); render(); });
     row.appendChild(btn);
@@ -241,9 +279,13 @@ function render() {
       if (todo.groupId && currentGroupFilter === null) {
         const group = groups.find(g => g.id === todo.groupId);
         if (group) {
+          const c = GROUP_COLORS[group.colorIndex];
           const badge = document.createElement('span');
           badge.className = 'group-badge';
           badge.textContent = group.name;
+          badge.style.background = c.bg;
+          badge.style.color = c.text;
+          badge.style.borderColor = c.border;
           topRow.appendChild(badge);
         }
       }
