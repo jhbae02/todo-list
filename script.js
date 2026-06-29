@@ -6,9 +6,18 @@ const clearCompletedBtn = document.getElementById('clear-completed-btn');
 const tabs = document.querySelectorAll('.tab');
 const selectAllBar = document.getElementById('select-all-bar');
 const selectAllCheckbox = document.getElementById('select-all-checkbox');
+const descToggleBtn = document.getElementById('desc-toggle-btn');
+const todoDescInput = document.getElementById('todo-desc-input');
 
 let todos = [];
 let currentFilter = 'all';
+
+descToggleBtn.addEventListener('click', () => {
+  const isHidden = todoDescInput.style.display === 'none';
+  todoDescInput.style.display = isHidden ? 'block' : 'none';
+  descToggleBtn.textContent = isHidden ? '－ 설명 접기' : '＋ 설명 추가';
+  if (isHidden) todoDescInput.focus();
+});
 
 const EMPTY_SVG = `
 <svg width="90" height="90" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -33,9 +42,13 @@ function getFiltered() {
 function addTodo() {
   const text = todoInput.value.trim();
   if (!text) return;
+  const description = todoDescInput.value.trim();
   const now = Date.now();
-  todos.push({ id: now, text, completed: false, createdAt: now });
+  todos.push({ id: now, text, description, completed: false, createdAt: now });
   todoInput.value = '';
+  todoDescInput.value = '';
+  todoDescInput.style.display = 'none';
+  descToggleBtn.textContent = '＋ 설명 추가';
   render();
 }
 
@@ -100,10 +113,37 @@ function render() {
       const textWrap = document.createElement('div');
       textWrap.className = 'todo-text-wrap';
 
+      const topRow = document.createElement('div');
+      topRow.className = 'todo-top-row';
+
       const span = document.createElement('span');
       span.className = 'todo-text';
       span.textContent = todo.text;
-      textWrap.appendChild(span);
+      topRow.appendChild(span);
+
+      if (todo.description) {
+        const descBtn = document.createElement('button');
+        descBtn.className = 'desc-expand-btn';
+        descBtn.title = '설명 보기';
+        descBtn.textContent = '▾';
+
+        const descEl = document.createElement('p');
+        descEl.className = 'todo-desc';
+        descEl.textContent = todo.description;
+        descEl.style.display = 'none';
+
+        descBtn.addEventListener('click', () => {
+          const hidden = descEl.style.display === 'none';
+          descEl.style.display = hidden ? 'block' : 'none';
+          descBtn.textContent = hidden ? '▴' : '▾';
+        });
+
+        topRow.appendChild(descBtn);
+        textWrap.appendChild(topRow);
+        textWrap.appendChild(descEl);
+      } else {
+        textWrap.appendChild(topRow);
+      }
 
       const timeRow = document.createElement('div');
       timeRow.className = 'todo-time-row';

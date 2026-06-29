@@ -41,8 +41,12 @@
 
     
     <div class="input-area">
-      <input type="text" id="todo-input" class="todo-input" placeholder="할 일을 입력하세요">
-      <button id="add-btn" class="add-btn">추가</button>
+      <div class="input-row">
+        <input type="text" id="todo-input" class="todo-input" placeholder="할 일을 입력하세요">
+        <button id="add-btn" class="add-btn">추가</button>
+      </div>
+      <button id="desc-toggle-btn" class="desc-toggle-btn">＋ 설명 추가</button>
+      <textarea id="todo-desc-input" class="todo-desc-input" placeholder="설명을 입력하세요 (선택사항)" style="display:none;"></textarea>
     </div>
 
     <div class="tabs">
