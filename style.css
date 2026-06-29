@@ -28,17 +28,31 @@ body {
   padding: 32px 36px 28px;
 }
 
+.header-top {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 6px;
+}
+
+.header-icon {
+  width: 52px;
+  height: 52px;
+  flex-shrink: 0;
+  filter: drop-shadow(0 2px 8px rgba(0,0,0,0.25));
+}
+
 .title {
   font-size: 2rem;
   font-weight: 800;
   color: #ffffff;
   letter-spacing: -0.5px;
+  margin-bottom: 0;
 }
 
 .subtitle {
   font-size: 0.95rem;
   color: #a8bce8;
-  margin-top: 6px;
 }
 
 /* Content area below header */
