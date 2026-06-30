@@ -15,7 +15,8 @@ CREATE TABLE IF NOT EXISTS todos (
   completed    BOOLEAN     NOT NULL DEFAULT FALSE,
   created_at   TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   completed_at TIMESTAMPTZ,
-  group_id     UUID        REFERENCES groups(id) ON DELETE SET NULL
+  group_id     UUID        REFERENCES groups(id) ON DELETE SET NULL,
+  priority     TEXT        CHECK (priority IN ('high', 'normal', 'low'))
 );
 
 -- Row Level Security (인증 없이 anon key로 전체 접근 허용)

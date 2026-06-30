@@ -42,12 +42,6 @@
       </div>
     </div>
 
-    <div class="search-bar">
-      <span class="search-icon">&#128269;</span>
-      <input type="text" id="search-input" class="search-input" placeholder="키워드로 검색…">
-      <button id="search-clear-btn" class="search-clear-btn" style="display:none;">×</button>
-    </div>
-
     <div class="group-manager">
       <button id="group-manager-toggle" class="group-manager-toggle">
         그룹 관리 <span id="group-manager-icon">▾</span>
@@ -73,6 +67,12 @@
         <select id="todo-group-select" class="todo-group-select">
           <option value="">그룹 없음</option>
         </select>
+        <select id="todo-priority" class="todo-priority-select">
+          <option value="">우선순위</option>
+          <option value="high">🔴 높음</option>
+          <option value="normal">🟡 보통</option>
+          <option value="low">🔵 낮음</option>
+        </select>
       </div>
       <textarea id="todo-desc-input" class="todo-desc-input" placeholder="설명을 입력하세요 (선택사항)" style="display:none;"></textarea>
     </div>
@@ -83,6 +83,12 @@
       <button class="tab active" data-filter="all">전체 <span class="tab-count" id="count-all">0</span></button>
       <button class="tab" data-filter="active">진행 중 <span class="tab-count" id="count-active">0</span></button>
       <button class="tab" data-filter="completed">완료 <span class="tab-count" id="count-completed">0</span></button>
+    </div>
+
+    <div class="search-bar">
+      <span class="search-icon">&#128269;</span>
+      <input type="text" id="search-input" class="search-input" placeholder="키워드로 검색…">
+      <button id="search-clear-btn" class="search-clear-btn" style="display:none;">×</button>
     </div>
 
     <div id="select-all-bar" class="select-all-bar" style="display:none;">

@@ -328,6 +328,36 @@ body {
   gap: 8px;
 }
 
+.todo-priority-select {
+  padding: 5px 10px;
+  border: 2px solid #c8d3ee;
+  border-radius: 8px;
+  font-size: 0.83rem;
+  color: #1a3678;
+  font-weight: 600;
+  background: #f8f9fd;
+  cursor: pointer;
+  outline: none;
+  transition: border-color 0.2s;
+  max-width: 100px;
+}
+
+.todo-priority-select:focus { border-color: #1a3678; }
+
+.priority-badge {
+  display: inline-block;
+  padding: 2px 7px;
+  border-radius: 8px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  flex-shrink: 0;
+  border: 1.5px solid transparent;
+}
+
+.priority-high   { background: #fde0e0; color: #c0392b; border-color: #f5a8a8; }
+.priority-normal { background: #fef3cd; color: #b7700d; border-color: #f5dea0; }
+.priority-low    { background: #e0eeff; color: #2a5db0; border-color: #a0c0f0; }
+
 .todo-group-select {
   padding: 5px 10px;
   border: 2px solid #c8d3ee;
@@ -801,6 +831,13 @@ body {
 [data-theme="dark"] .search-clear-btn { color: #4e5e7e; }
 [data-theme="dark"] .search-clear-btn:hover { background: #1c2336; color: #90aad8; }
 [data-theme="dark"] .search-highlight { background: #7a6200; color: #ffe88a; }
+
+[data-theme="dark"] .todo-priority-select {
+  background: #1c2336;
+  border-color: #2d3a54;
+  color: #c8d8ef;
+}
+[data-theme="dark"] .todo-priority-select:focus { border-color: #4a72d4; background: #212840; }
 
 [data-theme="dark"] .group-filter-btn {
   background: #1c2336;

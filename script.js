@@ -41,6 +41,8 @@ function dbGroupToLocal(g) {
   return { id: g.id, name: g.name, colorIndex: g.color_index }
 }
 
+const PRIORITY_ORDER = { high: 0, normal: 1, low: 2 }
+
 function dbTodoToLocal(t) {
   return {
     id:          t.id,
@@ -50,6 +52,7 @@ function dbTodoToLocal(t) {
     createdAt:   t.created_at,
     completedAt: t.completed_at ?? null,
     groupId:     t.group_id ?? null,
+    priority:    t.priority ?? null,
   }
 }
 
@@ -284,16 +287,22 @@ descToggleBtn.addEventListener('click', () => {
 // ── Filtering ─────────────────────────────────────────────────
 function getFiltered() {
   const q = searchQuery.trim().toLowerCase()
-  return todos.filter(t => {
-    const statusMatch = currentFilter === 'active'    ? !t.completed
-                      : currentFilter === 'completed' ?  t.completed
-                      : true
-    const groupMatch  = currentGroupFilter === null ? true : t.groupId === currentGroupFilter
-    const searchMatch = !q
-      || t.text.toLowerCase().includes(q)
-      || (t.description && t.description.toLowerCase().includes(q))
-    return statusMatch && groupMatch && searchMatch
-  })
+  return todos
+    .filter(t => {
+      const statusMatch = currentFilter === 'active'    ? !t.completed
+                        : currentFilter === 'completed' ?  t.completed
+                        : true
+      const groupMatch  = currentGroupFilter === null ? true : t.groupId === currentGroupFilter
+      const searchMatch = !q
+        || t.text.toLowerCase().includes(q)
+        || (t.description && t.description.toLowerCase().includes(q))
+      return statusMatch && groupMatch && searchMatch
+    })
+    .sort((a, b) => {
+      const pa = a.priority != null ? (PRIORITY_ORDER[a.priority] ?? 99) : 99
+      const pb = b.priority != null ? (PRIORITY_ORDER[b.priority] ?? 99) : 99
+      return pa - pb
+    })
 }
 
 function highlightText(text, query) {
@@ -317,10 +326,12 @@ async function addTodo() {
   const description = todoDescInput.value.trim()
   const groupIdVal  = document.getElementById('todo-group-select').value
   const groupId     = groupIdVal || null
+  const prioritySel = document.getElementById('todo-priority')
+  const priority    = prioritySel.value || null
 
   const { data, error } = await supabase
     .from('todos')
-    .insert({ text, description, completed: false, group_id: groupId })
+    .insert({ text, description, completed: false, group_id: groupId, priority })
     .select()
     .single()
   if (error) { console.error(error); return }
@@ -330,6 +341,7 @@ async function addTodo() {
   todoDescInput.value         = ''
   todoDescInput.style.display = 'none'
   descToggleBtn.textContent   = '＋ 설명 추가'
+  prioritySel.value           = ''
   render()
 }
 
@@ -440,6 +452,14 @@ function render() {
       if (highlighted) span.appendChild(highlighted)
       else span.textContent = todo.text
       topRow.appendChild(span)
+
+      if (todo.priority) {
+        const pLabel = { high: '높음', normal: '보통', low: '낮음' }[todo.priority]
+        const pb = document.createElement('span')
+        pb.className   = `priority-badge priority-${todo.priority}`
+        pb.textContent = pLabel
+        topRow.appendChild(pb)
+      }
 
       if (todo.groupId && currentGroupFilter === null) {
         const group = groups.find(g => g.id === todo.groupId)
