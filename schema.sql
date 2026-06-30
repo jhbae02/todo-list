@@ -18,6 +18,7 @@ CREATE TABLE IF NOT EXISTS todos (
   completed_at TIMESTAMPTZ,
   group_id     UUID        REFERENCES groups(id) ON DELETE SET NULL,
   priority     TEXT        CHECK (priority IN ('high', 'normal', 'low')),
+  due_date     DATE,
   user_id      UUID        REFERENCES auth.users(id) ON DELETE CASCADE
 );
 

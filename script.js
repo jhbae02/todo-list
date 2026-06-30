@@ -54,6 +54,7 @@ function dbTodoToLocal(t) {
     completedAt: t.completed_at ?? null,
     groupId:     t.group_id ?? null,
     priority:    t.priority ?? null,
+    dueDate:     t.due_date ?? null,
   }
 }
 
@@ -331,10 +332,12 @@ async function addTodo() {
   const groupId     = groupIdVal || null
   const prioritySel = document.getElementById('todo-priority')
   const priority    = prioritySel.value || null
+  const dueDateEl   = document.getElementById('todo-due-date')
+  const dueDate     = dueDateEl.value || null
 
   const { data, error } = await supabase
     .from('todos')
-    .insert({ text, description, completed: false, group_id: groupId, priority, user_id: currentUser.id })
+    .insert({ text, description, completed: false, group_id: groupId, priority, due_date: dueDate, user_id: currentUser.id })
     .select()
     .single()
   if (error) { console.error(error); return }
@@ -345,6 +348,7 @@ async function addTodo() {
   todoDescInput.style.display = 'none'
   descToggleBtn.textContent   = '＋ 설명 추가'
   prioritySel.value           = ''
+  dueDateEl.value             = ''
   render()
 }
 
@@ -378,6 +382,13 @@ async function clearCompleted() {
   render()
 }
 
+async function updateTodoText(id, newText) {
+  const { error } = await supabase.from('todos').update({ text: newText }).eq('id', id)
+  if (error) { console.error(error); return }
+  todos = todos.map(t => t.id === id ? { ...t, text: newText } : t)
+  render()
+}
+
 // ── Render ────────────────────────────────────────────────────
 const EMPTY_SVG = `
 <svg width="90" height="90" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -390,6 +401,17 @@ const EMPTY_SVG = `
   <circle cx="72" cy="72" r="16" fill="#1a3678"/>
   <path d="M65 72l4.5 4.5 9-9" stroke="white" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/>
 </svg>`
+
+function calcDday(dueDateStr) {
+  const today = new Date()
+  today.setHours(0, 0, 0, 0)
+  const [y, m, d] = dueDateStr.split('-').map(Number)
+  const due = new Date(y, m - 1, d)
+  const diff = Math.round((due - today) / 86400000)
+  if (diff === 0) return { label: 'D-day', diff: 0 }
+  if (diff > 0)  return { label: `D-${diff}`, diff }
+  return { label: `D+${Math.abs(diff)}`, diff }
+}
 
 function formatDate(ts) {
   const d   = new Date(ts)
@@ -454,6 +476,30 @@ function render() {
       const highlighted = highlightText(todo.text, searchQuery.trim())
       if (highlighted) span.appendChild(highlighted)
       else span.textContent = todo.text
+      if (!todo.completed) {
+        span.addEventListener('dblclick', () => {
+          const editInput = document.createElement('input')
+          editInput.type = 'text'
+          editInput.className = 'todo-inline-edit'
+          editInput.value = todo.text
+          let saved = false
+          const save = async () => {
+            if (saved) return
+            saved = true
+            const newText = editInput.value.trim()
+            if (newText && newText !== todo.text) await updateTodoText(todo.id, newText)
+            else render()
+          }
+          editInput.addEventListener('keydown', e => {
+            if (e.key === 'Enter')  { e.preventDefault(); save() }
+            if (e.key === 'Escape') { saved = true; render() }
+          })
+          editInput.addEventListener('blur', save)
+          span.replaceWith(editInput)
+          editInput.focus()
+          editInput.select()
+        })
+      }
       topRow.appendChild(span)
 
       if (todo.priority) {
@@ -462,6 +508,14 @@ function render() {
         pb.className   = `priority-badge priority-${todo.priority}`
         pb.textContent = pLabel
         topRow.appendChild(pb)
+      }
+
+      if (todo.dueDate) {
+        const { label, diff } = calcDday(todo.dueDate)
+        const db = document.createElement('span')
+        db.className = 'dday-badge' + (diff < 0 ? ' dday-overdue' : diff === 0 ? ' dday-today' : '')
+        db.textContent = label
+        topRow.appendChild(db)
       }
 
       if (todo.groupId && currentGroupFilter === null) {

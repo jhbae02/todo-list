@@ -376,6 +376,59 @@ body {
   border-color: #1a3678;
 }
 
+.todo-due-date {
+  padding: 5px 8px;
+  border: 2px solid #c8d3ee;
+  border-radius: 8px;
+  font-size: 0.83rem;
+  color: #1a3678;
+  font-weight: 600;
+  background: #f8f9fd;
+  cursor: pointer;
+  outline: none;
+  font-family: inherit;
+  transition: border-color 0.2s;
+}
+
+.todo-due-date:focus { border-color: #1a3678; }
+
+.dday-badge {
+  display: inline-block;
+  padding: 2px 7px;
+  border-radius: 8px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  flex-shrink: 0;
+  border: 1.5px solid #a0c0f0;
+  background: #e0eeff;
+  color: #2a5db0;
+}
+
+.dday-badge.dday-today {
+  background: #fef3cd;
+  color: #b7700d;
+  border-color: #f5dea0;
+}
+
+.dday-badge.dday-overdue {
+  background: #fde0e0;
+  color: #c0392b;
+  border-color: #f5a8a8;
+}
+
+.todo-inline-edit {
+  flex: 1;
+  min-width: 0;
+  padding: 2px 7px;
+  border: 2px solid #1a3678;
+  border-radius: 6px;
+  font-size: 0.97rem;
+  color: #1a3678;
+  font-family: inherit;
+  background: #f4f6fb;
+  outline: none;
+}
+
 .desc-toggle-btn {
   background: none;
   border: none;
@@ -1052,3 +1105,7 @@ body {
 [data-theme="dark"] .auth-message { color: #4e5e7e; }
 [data-theme="dark"] .auth-message.error { color: #e05555; }
 [data-theme="dark"] .auth-message.success { color: #3a7a58; }
+
+[data-theme="dark"] .todo-due-date { background: #1c2336; border-color: #2d3a54; color: #c8d8ef; }
+[data-theme="dark"] .todo-due-date:focus { border-color: #4a72d4; background: #212840; }
+[data-theme="dark"] .todo-inline-edit { background: #1c2336; border-color: #4a72d4; color: #c8d8ef; }
