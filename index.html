@@ -7,12 +7,37 @@
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <div class="container">
+
+  <!-- 로그인/회원가입 화면 -->
+  <div id="auth-overlay" class="auth-overlay">
+    <div class="auth-card">
+      <div class="auth-header">
+        <h1 class="auth-title">TODO List</h1>
+        <p class="auth-subtitle">할 일을 정리하려면 로그인하세요</p>
+      </div>
+      <div class="auth-tabs">
+        <button class="auth-tab active" data-mode="login">로그인</button>
+        <button class="auth-tab" data-mode="signup">회원가입</button>
+      </div>
+      <form id="auth-form" class="auth-form">
+        <input type="email" id="auth-email" class="auth-input" placeholder="이메일" required autocomplete="email">
+        <input type="password" id="auth-password" class="auth-input" placeholder="비밀번호 (6자 이상)" required minlength="6" autocomplete="current-password">
+        <button type="submit" id="auth-submit" class="auth-submit-btn">로그인</button>
+      </form>
+      <p id="auth-message" class="auth-message"></p>
+    </div>
+  </div>
+
+  <div id="app-container" class="container" style="display:none;">
     <div class="header">
       <div class="header-top">
         <div class="header-text">
           <h1 class="title">TODO List</h1>
           <p class="subtitle">오늘 할 일을 정리해보세요~~</p>
+          <div id="header-user" class="header-user" style="display:none;">
+            <span id="user-email" class="user-email"></span>
+            <button id="logout-btn" class="logout-btn">로그아웃</button>
+          </div>
         </div>
         <div class="header-right">
           <button id="theme-toggle" class="theme-toggle" title="다크 모드 전환">🌙 다크</button>

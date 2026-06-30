@@ -24,6 +24,7 @@ let currentFilter      = 'all'
 let currentGroupFilter = null
 let searchQuery        = ''
 let isLoading          = true
+let currentUser        = null
 
 const GROUP_COLORS = [
   { bg: '#dde5f7', text: '#2a4a9f', border: '#b0c2ee' },
@@ -58,6 +59,7 @@ function dbTodoToLocal(t) {
 
 // ── Migration: localStorage → Supabase (runs once) ───────────
 async function migrateFromLocalStorage() {
+  if (!currentUser) return
   if (localStorage.getItem('tdl-migrated')) return
 
   let oldGroups = []
@@ -74,7 +76,7 @@ async function migrateFromLocalStorage() {
     return
   }
 
-  // DB가 비어 있을 때만 마이그레이션
+  // 이 계정에 이미 데이터가 있으면 마이그레이션 건너뜀
   const { count } = await supabase
     .from('todos')
     .select('id', { count: 'exact', head: true })
@@ -88,7 +90,7 @@ async function migrateFromLocalStorage() {
   for (const g of oldGroups) {
     const { data } = await supabase
       .from('groups')
-      .insert({ name: g.name, color_index: g.colorIndex })
+      .insert({ name: g.name, color_index: g.colorIndex, user_id: currentUser.id })
       .select()
       .single()
     if (data) groupIdMap[g.id] = data.id
@@ -104,6 +106,7 @@ async function migrateFromLocalStorage() {
         created_at:   new Date(t.createdAt).toISOString(),
         completed_at: t.completedAt ? new Date(t.completedAt).toISOString() : null,
         group_id:     t.groupId != null ? (groupIdMap[t.groupId] ?? null) : null,
+        user_id:      currentUser.id,
       }))
     )
   }
@@ -135,7 +138,7 @@ async function addGroup(name) {
   const colorIndex = groups.length % GROUP_COLORS.length
   const { data, error } = await supabase
     .from('groups')
-    .insert({ name: trimmed, color_index: colorIndex })
+    .insert({ name: trimmed, color_index: colorIndex, user_id: currentUser.id })
     .select()
     .single()
   if (error) { console.error(error); return }
@@ -331,7 +334,7 @@ async function addTodo() {
 
   const { data, error } = await supabase
     .from('todos')
-    .insert({ text, description, completed: false, group_id: groupId, priority })
+    .insert({ text, description, completed: false, group_id: groupId, priority, user_id: currentUser.id })
     .select()
     .single()
   if (error) { console.error(error); return }
@@ -630,12 +633,96 @@ const savedTheme = localStorage.getItem('tdl-theme')
   || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light')
 applyTheme(savedTheme)
 
-// ── Bootstrap ─────────────────────────────────────────────────
-;(async () => {
-  render() // 로딩 스피너 표시
+// ── Auth helpers ──────────────────────────────────────────────
+async function showApp(user) {
+  currentUser = user
+  document.getElementById('auth-overlay').style.display = 'none'
+  document.getElementById('app-container').style.display = 'block'
+  document.getElementById('header-user').style.display = 'flex'
+  document.getElementById('user-email').textContent = user.email
+
+  isLoading = true
+  render()
   await migrateFromLocalStorage()
   await loadFromSupabase()
   isLoading = false
   updateGroupUI()
   render()
-})()
+}
+
+function showAuthForm() {
+  currentUser = null
+  todos = []
+  groups = []
+  currentFilter = 'all'
+  currentGroupFilter = null
+  searchQuery = ''
+  document.getElementById('app-container').style.display = 'none'
+  document.getElementById('header-user').style.display = 'none'
+  document.getElementById('auth-overlay').style.display = 'flex'
+}
+
+// ── Auth state change ─────────────────────────────────────────
+supabase.auth.onAuthStateChange(async (event, session) => {
+  if (event === 'INITIAL_SESSION' || event === 'SIGNED_IN') {
+    if (session?.user) {
+      await showApp(session.user)
+    } else {
+      showAuthForm()
+    }
+  } else if (event === 'SIGNED_OUT') {
+    showAuthForm()
+  }
+})
+
+// ── Auth form ─────────────────────────────────────────────────
+let authMode = 'login'
+const authTabs   = document.querySelectorAll('.auth-tab')
+const authSubmit = document.getElementById('auth-submit')
+const authMsg    = document.getElementById('auth-message')
+
+authTabs.forEach(tab => {
+  tab.addEventListener('click', () => {
+    authMode = tab.dataset.mode
+    authTabs.forEach(t => t.classList.remove('active'))
+    tab.classList.add('active')
+    authSubmit.textContent = authMode === 'login' ? '로그인' : '회원가입'
+    authMsg.textContent = ''
+    authMsg.className = 'auth-message'
+  })
+})
+
+document.getElementById('auth-form').addEventListener('submit', async e => {
+  e.preventDefault()
+  const email    = document.getElementById('auth-email').value.trim()
+  const password = document.getElementById('auth-password').value
+  authSubmit.disabled = true
+  authMsg.textContent = authMode === 'login' ? '로그인 중...' : '회원가입 중...'
+  authMsg.className = 'auth-message'
+
+  let error
+  if (authMode === 'login') {
+    const res = await supabase.auth.signInWithPassword({ email, password })
+    error = res.error
+  } else {
+    const res = await supabase.auth.signUp({ email, password })
+    error = res.error
+    if (!error && !res.data?.session) {
+      authMsg.textContent = '이메일을 확인해서 인증 링크를 클릭한 후 로그인하세요.'
+      authMsg.className = 'auth-message success'
+      authSubmit.disabled = false
+      return
+    }
+  }
+
+  if (error) {
+    authMsg.textContent = error.message
+    authMsg.className = 'auth-message error'
+    authSubmit.disabled = false
+  }
+  // 성공 시 onAuthStateChange가 처리
+})
+
+document.getElementById('logout-btn').addEventListener('click', async () => {
+  await supabase.auth.signOut()
+})
